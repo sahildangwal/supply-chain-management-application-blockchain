@@ -1,0 +1,17 @@
+{
+  "name": "supply_chain_project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^2.1.14",
+    "dotenv": "^16.3.1",
+    "web3": "^4.1.1"
+  }
+}

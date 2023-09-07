@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Supply Chain App</title>
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <!-- Include web3.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.0/dist/web3.min.js"></script>
+  </head>
+  <body>
+    <h1>Add Product</h1>
+    <form id="addProductForm">
+      <label for="productName">Product Name:</label>
+      <input type="text" id="productName" required /><br />
+
+      <label for="productPrice">Product Price (ETH):</label>
+      <input type="text" id="productPrice" required /><br />
+
+      <button type="submit">Add Product</button>
+    </form>
+    <h2>Added Product</h2>
+    <ul id="productList"></ul>
+    <div id="transactionResult"></div>
+
+    <h2>Get Product Details</h2>
+    <form id="getProductForm">
+      <label for="productIndex">Product Index:</label>
+      <input type="text" id="productId" required /><br />
+      <button type="submit">Get Product Details</button>
+    </form>
+    <div id="pn"></div>
+    <div id="gas"></div>
+    <div id="seller"></div>
+
+    <h2>Total Products</h2>
+    <form id="getProductsCountForm">
+      <button type="submit">Get Total Products Count</button>
+    </form>
+    <div id="totalProducts"></div>
+
+    
+
+    <script>
+      
+      const web3 = new Web3("http://127.0.0.1:7545"); 
+
+      
+      const contractABI = [
+        {
+          inputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "address",
+              name: "seller",
+              type: "address",
+            },
+          ],
+          name: "ProductAdded",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "owner",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+          constant: true,
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "products",
+          outputs: [
+            {
+              internalType: "string",
+              name: "name",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "price",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "seller",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+          constant: true,
+        },
+        {
+          inputs: [
+            {
+              internalType: "string",
+              name: "_name",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "_price",
+              type: "uint256",
+            },
+          ],
+          name: "addProduct",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "_index",
+              type: "uint256",
+            },
+          ],
+          name: "getProduct",
+          outputs: [
+            {
+              internalType: "string",
+              name: "",
+              type: "string",
+            },
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+          constant: true,
+        },
+        {
+          inputs: [],
+          name: "getProductsCount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+          constant: true,
+        },
+      ];
+
+      // Contract address
+      const contractAddress = "0x5dAE688D04e7099738302B3a012Bd1E01FC999Fb"; // Replace with your contract address
+
+      // Create a contract instance
+      const supplyChainContract = new web3.eth.Contract(
+        contractABI,
+        contractAddress
+      );
+
+      //form submission for adding a product
+      document
+        .getElementById("addProductForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const productName = document.getElementById("productName").value;
+          const productPrice = document.getElementById("productPrice").value;
+
+          try {
+            const accounts = await web3.eth.getAccounts();
+            console.log(accounts[0]);
+
+            //convert productPrice to wei
+            const productPriceInWei = web3.utils.toWei(productPrice, "ether");
+
+            //execute the addProduct function on the smart contract
+            const result = await supplyChainContract.methods
+              .addProduct(productName, productPriceInWei)
+              .send({ from: accounts[0], gas: "1000000" });
+
+            const resultString = JSON.stringify(result);
+
+            //display transaction result
+            document.getElementById("transactionResult").innerHTML =
+              resultString;
+          } catch (error) {
+            console.error(error);
+            document.getElementById("transactionResult").innerHTML =
+              "Error adding product";
+          }
+        });
+
+      //handle form submission for getting product details by index
+      document
+        .getElementById("getProductForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          try {
+            //get the index entered by the user
+            const indexInput = document.getElementById("productId").value;
+
+            //call the getProduct function with the index
+            const productDetails = await supplyChainContract.methods
+              .getProduct(indexInput)
+              .call();
+
+            //update HTML elements to display the results
+            const productNameElement = document.getElementById("pn");
+            productNameElement.innerHTML = "Product Name: " + productDetails[0];
+
+            const gasPriceElement = document.getElementById("gas");
+            gasPriceElement.innerHTML =
+              "Gas Price: " + productDetails[1].toString();
+
+            const sellerElement = document.getElementById("seller");
+            sellerElement.innerHTML = "Seller Address: " + productDetails[2];
+          } catch (error) {
+            console.error(error);
+            const productNameElement = document.getElementById("pn");
+            productNameElement.innerHTML = "Error fetching product details";
+            const gasPriceElement = document.getElementById("gas");
+            gasPriceElement.innerHTML = "";
+            const sellerElement = document.getElementById("seller");
+            sellerElement.innerHTML = "";
+          }
+        });
+
+      //form submission for getting the total number of products
+      document.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        try {
+          //call getProductCount
+          const productCount = await supplyChainContract.methods
+            .getProductsCount()
+            .call();
+          const totalProductsElement = document.getElementById("totalProducts");
+          totalProductsElement.innerHTML =
+            "Total Products: " + `${productCount.toString()}`;
+        } catch (error) {
+          console.error(error);
+          const totalProductsElement = document.getElementById("totalProducts");
+          totalProductsElement.innerHTML = "Error counting product";
+        }
+      });
+
+    </script>
+  </body>
+</html>
