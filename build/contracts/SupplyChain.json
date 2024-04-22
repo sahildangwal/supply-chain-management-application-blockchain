@@ -8463,12 +8463,12 @@
     "5777": {
       "events": {},
       "links": {},
-      "address": "0x2a232E263E7c6d8Fe4f36106092bBd5d192E4094",
-      "transactionHash": "0x595a89bf963aa076a06ced00b107c57b7f5dbe4a3ad38315e0bc4bb25e8deddf"
+      "address": "0x54605CFA61d5AC1f4bB1D6Da885eAC5109D830E8",
+      "transactionHash": "0x42e17c7a9f4f00d4889ad1a78f1cc2ce0344deed59148afacb9614f389fdedcd"
     }
   },
   "schemaVersion": "3.4.15",
-  "updatedAt": "2023-09-07T19:41:04.933Z",
+  "updatedAt": "2024-04-22T18:17:19.983Z",
   "networkType": "ethereum",
   "devdoc": {
     "kind": "dev",
